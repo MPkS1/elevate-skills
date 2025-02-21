@@ -1,0 +1,498 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Special Admin Dashboard</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Poppins', sans-serif;
+        }
+
+        body {
+            background: linear-gradient(135deg, #1a0933, #3b1e66, #2a2a72);
+            color: #fff;
+            min-height: 100vh;
+            padding: 20px;
+            overflow-x: hidden;
+            position: relative;
+            perspective: 1000px; /* Enables 3D space */
+        }
+
+        /* Floating particles */
+        .particles {
+            position: absolute;
+            width: 100%;
+            height: 100%;
+            top: 0;
+            left: 0;
+            pointer-events: none;
+            z-index: 0;
+        }
+
+        .dashboard {
+            position: relative;
+            max-width: 1200px;
+            margin: 0 auto;
+            z-index: 1;
+        }
+
+        h1, h2, h3 {
+            color: #00ffcc;
+            text-shadow: 0 0 15px rgba(0, 255, 204, 0.8), 0 0 25px rgba(0, 204, 255, 0.5);
+            margin-bottom: 20px;
+            font-weight: 600;
+            letter-spacing: 1px;
+        }
+
+        h1 {
+            font-size: 2.8rem;
+            text-align: center;
+            animation: glowPulse 2s infinite alternate;
+        }
+
+        @keyframes glowPulse {
+            0% { text-shadow: 0 0 10px rgba(0, 255, 204, 0.8); }
+            100% { text-shadow: 0 0 20px rgba(0, 255, 204, 1), 0 0 30px rgba(0, 204, 255, 0.8); }
+        }
+
+        /* Flash Messages */
+        .success { color: #00ffcc; }
+        .error { color: #ff3366; }
+        p.success, p.error {
+            background: rgba(255, 255, 255, 0.1);
+            padding: 10px;
+            border-radius: 8px;
+            margin-bottom: 15px;
+            text-align: center;
+            animation: slideIn 0.5s ease-in-out;
+        }
+
+        @keyframes slideIn {
+            0% { opacity: 0; transform: translateY(-20px); }
+            100% { opacity: 1; transform: translateY(0); }
+        }
+
+        /* Card Styling with 3D Effect */
+        .card {
+            background: rgba(255, 255, 255, 0.05);
+            backdrop-filter: blur(12px);
+            border-radius: 15px;
+            padding: 20px;
+            margin-bottom: 20px;
+            box-shadow: 0 8px 32px rgba(0, 0, 0, 0.4);
+            transform-style: preserve-3d;
+            transition: transform 0.5s ease, box-shadow 0.5s ease;
+            position: relative;
+        }
+
+        .card:hover {
+            transform: translateZ(20px) rotateX(5deg) rotateY(5deg);
+            box-shadow: 0 0 40px rgba(0, 255, 204, 0.6), 0 0 60px rgba(0, 204, 255, 0.4);
+        }
+
+        /* Form Styling */
+        .form-group {
+            margin-bottom: 20px;
+        }
+
+        form {
+            display: flex;
+            flex-direction: column;
+            gap: 15px;
+        }
+
+        label {
+            color: #ddd;
+            font-size: 1rem;
+            display: flex;
+            flex-direction: column;
+            gap: 5px;
+        }
+
+        input[type="text"],
+        textarea,
+        select {
+            background: rgba(255, 255, 255, 0.15);
+            border: none;
+            border-radius: 8px;
+            padding: 10px;
+            color: #fff;
+            font-size: 1rem;
+            outline: none;
+            transition: all 0.3s ease;
+            box-shadow: inset 0 0 5px rgba(0, 255, 204, 0.3);
+        }
+
+        input[type="text"]:focus,
+        textarea:focus,
+        select:focus {
+            box-shadow: 0 0 15px rgba(0, 255, 204, 0.8), inset 0 0 5px rgba(0, 204, 255, 0.5);
+        }
+
+        button {
+            background: linear-gradient(90deg, #00ffcc, #00ccff, #ff00cc);
+            background-size: 200% 200%;
+            border: none;
+            border-radius: 8px;
+            padding: 10px;
+            color: #fff;
+            font-weight: bold;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            animation: gradientShift 5s infinite;
+        }
+
+        button:hover {
+            transform: translateZ(10px);
+            box-shadow: 0 0 20px rgba(0, 255, 204, 0.8), 0 0 30px rgba(255, 0, 204, 0.6);
+        }
+
+        @keyframes gradientShift {
+            0% { background-position: 0% 50%; }
+            50% { background-position: 100% 50%; }
+            100% { background-position: 0% 50%; }
+        }
+
+        /* Lists */
+        ul {
+            list-style: none;
+            padding-left: 0;
+        }
+
+        li {
+            background: rgba(255, 255, 255, 0.05);
+            padding: 10px;
+            border-radius: 8px;
+            margin-bottom: 10px;
+            transition: transform 0.3s ease, background 0.3s ease;
+        }
+
+        li:hover {
+            background: rgba(255, 255, 255, 0.15);
+            transform: translateZ(5px);
+        }
+
+        /* Links */
+        a {
+            color: #00ffcc;
+            text-decoration: none;
+            font-weight: bold;
+            transition: color 0.3s ease, text-shadow 0.3s ease;
+        }
+
+        a:hover {
+            color: #ff00cc;
+            text-shadow: 0 0 10px rgba(255, 0, 204, 0.8);
+        }
+
+        /* Delete Buttons */
+        button[type="submit"] {
+            background: linear-gradient(90deg, #ff3366, #cc00ff);
+            margin-left: 10px;
+        }
+
+        button[type="submit"]:hover {
+            transform: translateZ(5px);
+            box-shadow: 0 0 20px rgba(255, 51, 102, 0.8);
+        }
+
+        /* Responsive */
+        @media (max-width: 768px) {
+            .dashboard {
+                padding: 10px;
+            }
+            h1 { font-size: 2rem; }
+            h2 { font-size: 1.5rem; }
+            h3 { font-size: 1.2rem; }
+        }
+    </style>
+</head>
+<body>
+    <div class="particles" id="particles"></div>
+    <div class="dashboard">
+        <h1>Special Admin Dashboard</h1>
+
+        <!-- Flash Messages -->
+        {% with messages = get_flashed_messages(with_categories=true) %}
+            {% if messages %}
+                {% for category, message in messages %}
+                    <p class="{{ category }}">{{ message }}</p>
+                {% endfor %}
+            {% endif %}
+        {% endwith %}
+
+        <!-- User Statistics -->
+        <div class="card stats">
+            <h2>User Statistics</h2>
+            <p>Members: {{ members_count }}</p>
+            <p>Wingheads: {{ wingheads_count }}</p>
+            <p>Admins: {{ admins_count }}</p>
+            <p>Special Admins: {{ special_admins_count }}</p>
+        </div>
+
+        <!-- Wing Selection -->
+        <div class="card form-group">
+            <h2>Select Wing to View Learnings</h2>
+            <form method="POST">
+                <input type="hidden" name="action" value="view_learnings">
+                <select name="wing_id" onchange="this.form.submit()">
+                    <option value="">-- Select a Wing --</option>
+                    {% for wing in wings %}
+                        <option value="{{ wing.id }}" {% if wing.id == selected_wing_id %}selected{% endif %}>
+                            {{ wing.name }}
+                        </option>
+                    {% endfor %}
+                </select>
+            </form>
+        </div>
+
+        <!-- Learnings Display -->
+        {% if learnings %}
+            <div class="card learnings">
+                <h2>Learnings for Selected Wing</h2>
+                {% for learning in learnings %}
+                    <div class="learning-item">
+                        <p><strong>{{ learning.username }}</strong> ({{ learning.role }}): {{ learning.learning_text }}</p>
+                        <form method="POST" style="display:inline;">
+                            <input type="hidden" name="action" value="delete_learning">
+                            <input type="hidden" name="learning_id" value="{{ learning.id }}">
+                            <button type="submit" onclick="return confirm('Are you sure you want to delete this?')">Delete</button>
+                        </form>
+                    </div>
+                {% endfor %}
+            </div>
+        {% endif %}
+
+        <!-- Create Wing Form -->
+        <div class="card form-group">
+            <h2>Create Wing</h2>
+            <form method="POST">
+                <input type="hidden" name="action" value="create_wing">
+                <label>Wing Name: <input type="text" name="wing_name" required></label>
+                <button type="submit">Create</button>
+            </form>
+        </div>
+
+        <!-- Create User Form -->
+        <div class="card form-group">
+            <h2>Create User</h2>
+            <form method="POST">
+                <input type="hidden" name="action" value="create_user">
+                <label>Username: <input type="text" name="username" required></label>
+                <label>Password: <input type="text" name="password" required></label>
+                <label>Role: 
+                    <select name="role" required>
+                        <option value="member">Member</option>
+                        <option value="winghead">Winghead</option>
+                        <option value="admin">Admin</option>
+                        <option value="special_admin">Special Admin</option>
+                    </select>
+                </label>
+                <label>Wing: 
+                    <select name="wing_id">
+                        <option value="">None</option>
+                        {% for wing in wings %}
+                            <option value="{{ wing.id }}">{{ wing.name }}</option>
+                        {% endfor %}
+                    </select>
+                </label>
+                <button type="submit">Create</button>
+            </form>
+        </div>
+
+        <!-- Create Quiz -->
+        <div class="card">
+            <h3>Create Quiz</h3>
+            <form method="POST">
+                <input type="hidden" name="action" value="create_quiz">
+                <label>Question: <input type="text" name="question" required></label>
+                <label>Quiz Type:
+                    <select name="quiz_type" onchange="showOptions(this.value)">
+                        <option value="2_option">2 Options</option>
+                        <option value="4_option">4 Options</option>
+                        <option value="text">Text</option>
+                    </select>
+                </label>
+                <label>Wing:
+                    <select name="wing_id">
+                        <option value="">All Wings</option>
+                        {% for wing in wings %}
+                            <option value="{{ wing.id }}">{{ wing.name }}</option>
+                        {% endfor %}
+                    </select>
+                </label>
+                <div id="options">
+                    <label>Option 1: <input type="text" name="option_1" required></label>
+                    <label>Option 2: <input type="text" name="option_2" required></label>
+                </div>
+                <label>Correct Option: <select name="correct_option">
+                    <option value="1">1</option>
+                    <option value="2">2</option>
+                </select></label>
+                <button type="submit">Create Quiz</button>
+            </form>
+        </div>
+
+        <!-- All Quizzes -->
+        <div class="card">
+            <h3>All Quizzes</h3>
+            <ul>
+                {% for quiz in quizzes %}
+                    <li>
+                        <a href="{{ url_for('special_admin', quiz_id=quiz.id) }}">{{ quiz.question }} (Wing: {{ quiz.wing_id or 'All' }})</a>
+                        <form method="POST" style="display:inline;">
+                            <input type="hidden" name="action" value="delete_quiz">
+                            <input type="hidden" name="quiz_id" value="{{ quiz.id }}">
+                            <button type="submit" onclick="return confirm('Are you sure?')">Delete</button>
+                        </form>
+                    </li>
+                {% endfor %}
+            </ul>
+        </div>
+
+        <!-- Quiz Responses -->
+        {% if responses %}
+            <div class="card">
+                <h3>Responses for Selected Quiz</h3>
+                <ul>
+                    {% for response in responses %}
+                        <li>{{ response.username }} ({{ response.wing_name or 'No Wing' }}): {{ response.option_text or response.text_response }} ({{ 'Correct' if response.is_correct else 'Wrong' }})</li>
+                    {% endfor %}
+                </ul>
+            </div>
+        {% endif %}
+
+        <!-- Send Notification -->
+        <div class="card">
+            <h3>Send Notification</h3>
+            <form method="POST">
+                <input type="hidden" name="action" value="send_notification">
+                <label>Notification: <textarea name="notification_content" rows="3" required></textarea></label>
+                <label>Wing:
+                    <select name="wing_id">
+                        <option value="">All Wings</option>
+                        {% for wing in wings %}
+                            <option value="{{ wing.id }}">{{ wing.name }}</option>
+                        {% endfor %}
+                    </select>
+                </label>
+                <button type="submit">Send</button>
+            </form>
+        </div>
+
+        <!-- Send News -->
+        <div class="card">
+            <h3>Send News</h3>
+            <form method="POST">
+                <input type="hidden" name="action" value="send_news">
+                <label>News: <textarea name="news_content" rows="3" required></textarea></label>
+                <button type="submit">Send</button>
+            </form>
+        </div>
+
+        <!-- Latest Notifications -->
+        <div class="card">
+            <h3>Latest Notifications</h3>
+            <ul>
+                {% for notification in notifications %}
+                    <li>
+                        {{ notification.content }} (Wing: {{ notification.wing_id or 'All' }}, Sent: {{ notification.sent_at }})
+                        <form method="POST" style="display:inline;">
+                            <input type="hidden" name="action" value="delete_notification">
+                            <input type="hidden" name="notification_id" value="{{ notification.id }}">
+                            <button type="submit" onclick="return confirm('Are you sure?')">Delete</button>
+                        </form>
+                    </li>
+                {% endfor %}
+            </ul>
+        </div>
+
+        <!-- Latest News -->
+        <div class="card">
+            <h3>Latest News</h3>
+            <ul>
+                {% for n in news %}
+                    <li>
+                        {{ n.content }} (Sent: {{ n.sent_at }})
+                        <form method="POST" style="display:inline;">
+                            <input type="hidden" name="action" value="delete_news">
+                            <input type="hidden" name="news_id" value="{{ n.id }}">
+                            <button type="submit" onclick="return confirm('Are you sure?')">Delete</button>
+                        </form>
+                    </li>
+                {% endfor %}
+            </ul>
+        </div>
+
+        <a href="{{ url_for('logout') }}">Logout</a>
+    </div>
+
+    <script>
+        // Floating particles with 3D effect
+        const particlesContainer = document.getElementById('particles');
+        const particleCount = 50;
+
+        for (let i = 0; i < particleCount; i++) {
+            const particle = document.createElement('div');
+            particle.style.position = 'absolute';
+            particle.style.width = `${Math.random() * 5 + 2}px`;
+            particle.style.height = particle.style.width;
+            particle.style.background = `hsl(${Math.random() * 360}, 70%, 70%)`;
+            particle.style.borderRadius = '50%';
+            particle.style.left = `${Math.random() * 100}vw`;
+            particle.style.top = `${Math.random() * 100}vh`;
+            particle.style.transform = `translateZ(${Math.random() * 100 - 50}px)`;
+            particle.style.animation = `float3D ${Math.random() * 8 + 4}s infinite ease-in-out`;
+            particlesContainer.appendChild(particle);
+        }
+
+        const styleSheet = document.createElement('style');
+        styleSheet.textContent = `
+            @keyframes float3D {
+                0% { transform: translateZ(-50px) translateY(0); opacity: 0.7; }
+                50% { transform: translateZ(50px) translateY(-15vh); opacity: 0.3; }
+                100% { transform: translateZ(-50px) translateY(0); opacity: 0.7; }
+            }
+        `;
+        document.head.appendChild(styleSheet);
+
+        // Card hover animation with 3D tilt
+        const cards = document.querySelectorAll('.card');
+        cards.forEach(card => {
+            card.addEventListener('mousemove', (e) => {
+                const rect = card.getBoundingClientRect();
+                const x = e.clientX - rect.left;
+                const y = e.clientY - rect.top;
+                const centerX = rect.width / 2;
+                const centerY = rect.height / 2;
+                const rotateX = (y - centerY) / 20;
+                const rotateY = (centerX - x) / 20;
+                card.style.transform = `translateZ(20px) rotateX(${rotateX}deg) rotateY(${rotateY}deg)`;
+            });
+            card.addEventListener('mouseleave', () => {
+                card.style.transform = 'translateZ(0)';
+            });
+        });
+
+        // Dynamic quiz options
+        function showOptions(type) {
+            const optionsDiv = document.getElementById('options');
+            optionsDiv.innerHTML = '';
+            if (type === 'text') return;
+            const count = type === '2_option' ? 2 : 4;
+            for (let i = 1; i <= count; i++) {
+                optionsDiv.innerHTML += `<label>Option ${i}: <input type="text" name="option_${i}" required></label>`;
+            }
+            const correctSelect = document.querySelector('select[name="correct_option"]');
+            correctSelect.innerHTML = '';
+            for (let i = 1; i <= count; i++) {
+                correctSelect.innerHTML += `<option value="${i}">${i}</option>`;
+            }
+        }
+    </script>
+</body>
+</html>

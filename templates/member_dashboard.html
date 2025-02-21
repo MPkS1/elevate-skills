@@ -1,0 +1,318 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Member Dashboard</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Poppins', sans-serif;
+        }
+
+        body {
+            background: linear-gradient(135deg, #1a0933, #3b1e66, #2a2a72);
+            color: #fff;
+            min-height: 100vh;
+            padding: 20px;
+            overflow-x: hidden;
+            position: relative;
+        }
+
+        /* Floating particles */
+        .particles {
+            position: absolute;
+            width: 100%;
+            height: 100%;
+            top: 0;
+            left: 0;
+            pointer-events: none;
+            z-index: 0;
+        }
+
+        .dashboard {
+            position: relative;
+            max-width: 1200px;
+            margin: 0 auto;
+            z-index: 1;
+        }
+
+        h2, h3 {
+            color: #00ffcc;
+            text-shadow: 0 0 10px rgba(0, 255, 204, 0.5);
+            margin-bottom: 20px;
+            font-weight: 600;
+            letter-spacing: 1px;
+        }
+
+        h2 {
+            font-size: 2.5rem;
+            text-align: center;
+            animation: fadeIn 1s ease-in-out;
+        }
+
+        @keyframes fadeIn {
+            0% { opacity: 0; transform: translateY(-20px); }
+            100% { opacity: 1; transform: translateY(0); }
+        }
+
+        /* Flash Messages */
+        .success { color: #00ffcc; }
+        .error { color: #ff3366; }
+        p.success, p.error {
+            background: rgba(255, 255, 255, 0.1);
+            padding: 10px;
+            border-radius: 8px;
+            margin-bottom: 15px;
+            text-align: center;
+        }
+
+        /* Card Styling */
+        .card {
+            background: rgba(255, 255, 255, 0.05);
+            backdrop-filter: blur(10px);
+            border-radius: 15px;
+            padding: 20px;
+            margin-bottom: 20px;
+            box-shadow: 0 0 20px rgba(0, 0, 0, 0.3);
+            transition: transform 0.3s ease;
+        }
+
+        .card:hover {
+            transform: translateY(-5px);
+        }
+
+        /* Form Styling */
+        form {
+            display: flex;
+            flex-direction: column;
+            gap: 15px;
+        }
+
+        label {
+            color: #ddd;
+            font-size: 1rem;
+        }
+
+        textarea, input[type="text"], input[type="radio"] {
+            background: rgba(255, 255, 255, 0.1);
+            border: none;
+            border-radius: 8px;
+            padding: 10px;
+            color: #fff;
+            font-size: 1rem;
+            outline: none;
+            transition: all 0.3s ease;
+        }
+
+        textarea:focus {
+            box-shadow: 0 0 15px rgba(0, 255, 204, 0.5);
+        }
+
+        button {
+            background: linear-gradient(90deg, #00ffcc, #00ccff);
+            border: none;
+            border-radius: 8px;
+            padding: 10px;
+            color: #fff;
+            font-weight: bold;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+
+        button:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 0 15px rgba(0, 255, 204, 0.7);
+        }
+
+        /* Lists */
+        ul {
+            list-style: none;
+            padding-left: 0;
+        }
+
+        li {
+            background: rgba(255, 255, 255, 0.05);
+            padding: 10px;
+            border-radius: 8px;
+            margin-bottom: 10px;
+            transition: background 0.3s ease;
+        }
+
+        li:hover {
+            background: rgba(255, 255, 255, 0.15);
+        }
+
+        /* Quiz Styling */
+        .quiz-container {
+            margin-bottom: 20px;
+        }
+
+        .option-correct { color: #00ff99; font-weight: bold; }
+        .option-wrong { color: #ff3366; font-weight: bold; }
+
+        .quiz-container label {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            padding: 5px 0;
+        }
+
+        input[type="radio"] {
+            accent-color: #00ffcc;
+        }
+
+        /* Logout Link */
+        a {
+            display: inline-block;
+            margin-top: 20px;
+            color: #00ffcc;
+            text-decoration: none;
+            font-weight: bold;
+            transition: color 0.3s ease;
+        }
+
+        a:hover {
+            color: #00ccff;
+            text-shadow: 0 0 10px rgba(0, 204, 255, 0.7);
+        }
+
+        /* Responsive */
+        @media (max-width: 768px) {
+            .dashboard {
+                padding: 10px;
+            }
+            h2 { font-size: 2rem; }
+            h3 { font-size: 1.5rem; }
+        }
+    </style>
+</head>
+<body>
+    <div class="particles" id="particles"></div>
+    <div class="dashboard">
+        <h2>Welcome, {{ username }} (Member)</h2>
+
+        <!-- Flash Messages -->
+        {% with messages = get_flashed_messages(with_categories=true) %}
+            {% if messages %}
+                {% for category, message in messages %}
+                    <p class="{{ category }}">{{ message }}</p>
+                {% endfor %}
+            {% endif %}
+        {% endwith %}
+
+        <div class="card">
+            <h3>Update Your Learning</h3>
+            <form method="POST">
+                <label for="learning_text">What did you learn today?</label>
+                <textarea id="learning_text" name="learning_text" rows="4" required></textarea>
+                <button type="submit">Submit</button>
+            </form>
+        </div>
+
+        <div class="card">
+            <h3>Learnings in Your Wing</h3>
+            <ul>
+                {% for learning in learnings %}
+                    <li>{{ learning.learning_text }}</li>
+                {% endfor %}
+            </ul>
+        </div>
+
+        <div class="card">
+            <h3>Quizzes</h3>
+            {% for qd in quiz_data %}
+                <div class="quiz-container">
+                    <p>{{ qd.quiz.question }}</p>
+                    {% if qd.response %}
+                        {% if qd.quiz.quiz_type == 'text' %}
+                            <p>Your Response: {{ qd.response.text_response }}</p>
+                        {% else %}
+                            {% for option in qd.options %}
+                                <p class="{% if option.id == qd.response.selected_option_id %}{% if option.is_correct %}option-correct{% else %}option-wrong{% endif %}{% endif %}">
+                                    {{ option.option_text }}
+                                </p>
+                            {% endfor %}
+                        {% endif %}
+                    {% else %}
+                        <form method="POST">
+                            <input type="hidden" name="action" value="submit_quiz">
+                            <input type="hidden" name="quiz_id" value="{{ qd.quiz.id }}">
+                            {% if qd.quiz.quiz_type == 'text' %}
+                                <textarea name="text_response" rows="3" required></textarea>
+                            {% else %}
+                                {% for option in qd.options %}
+                                    <label><input type="radio" name="option_id" value="{{ option.id }}" required> {{ option.option_text }}</label><br>
+                                {% endfor %}
+                            {% endif %}
+                            <button type="submit">Submit</button>
+                        </form>
+                    {% endif %}
+                </div>
+            {% endfor %}
+        </div>
+
+        <div class="card">
+            <h3>Latest Notifications</h3>
+            <ul>
+                {% for notification in notifications %}
+                    <li>{{ notification.content }} (Sent: {{ notification.sent_at }})</li>
+                {% endfor %}
+            </ul>
+        </div>
+
+        <div class="card">
+            <h3>Latest News</h3>
+            <ul>
+                {% for n in news %}
+                    <li>{{ n.content }} (Sent: {{ n.sent_at }})</li>
+                {% endfor %}
+            </ul>
+        </div>
+
+        <a href="{{ url_for('logout') }}">Logout</a>
+    </div>
+
+    <script>
+        // Floating particles effect
+        const particlesContainer = document.getElementById('particles');
+        const particleCount = 40;
+
+        for (let i = 0; i < particleCount; i++) {
+            const particle = document.createElement('div');
+            particle.style.position = 'absolute';
+            particle.style.width = `${Math.random() * 4 + 2}px`;
+            particle.style.height = particle.style.width;
+            particle.style.background = `rgba(255, 255, 255, ${Math.random() * 0.5 + 0.2})`;
+            particle.style.borderRadius = '50%';
+            particle.style.left = `${Math.random() * 100}vw`;
+            particle.style.top = `${Math.random() * 100}vh`;
+            particle.style.animation = `float ${Math.random() * 8 + 4}s infinite ease-in-out`;
+            particlesContainer.appendChild(particle);
+        }
+
+        const styleSheet = document.createElement('style');
+        styleSheet.textContent = `
+            @keyframes float {
+                0% { transform: translateY(0); opacity: 0.7; }
+                50% { transform: translateY(-15vh); opacity: 0.3; }
+                100% { transform: translateY(0); opacity: 0.7; }
+            }
+        `;
+        document.head.appendChild(styleSheet);
+
+        // Card hover animation
+        const cards = document.querySelectorAll('.card');
+        cards.forEach(card => {
+            card.addEventListener('mouseenter', () => {
+                card.style.boxShadow = '0 0 30px rgba(0, 255, 204, 0.5)';
+            });
+            card.addEventListener('mouseleave', () => {
+                card.style.boxShadow = '0 0 20px rgba(0, 0, 0, 0.3)';
+            });
+        });
+    </script>
+</body>
+</html>

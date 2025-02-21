@@ -1,0 +1,310 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Winghead Dashboard</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Poppins', sans-serif;
+        }
+
+        body {
+            background: linear-gradient(135deg, #1a0933, #3b1e66, #2a2a72);
+            color: #fff;
+            min-height: 100vh;
+            padding: 20px;
+            overflow-x: hidden;
+            position: relative;
+        }
+
+        /* Floating particles */
+        .particles {
+            position: absolute;
+            width: 100%;
+            height: 100%;
+            top: 0;
+            left: 0;
+            pointer-events: none;
+            z-index: 0;
+        }
+
+        .dashboard {
+            position: relative;
+            max-width: 1000px;
+            margin: 0 auto;
+            z-index: 1;
+        }
+
+        h2, h3 {
+            color: #00ffcc;
+            text-shadow: 0 0 10px rgba(0, 255, 204, 0.5);
+            margin-bottom: 20px;
+            font-weight: 600;
+            letter-spacing: 1px;
+        }
+
+        h2 {
+            font-size: 2.5rem;
+            text-align: center;
+            animation: fadeIn 1s ease-in-out;
+        }
+
+        @keyframes fadeIn {
+            0% { opacity: 0; transform: translateY(-20px); }
+            100% { opacity: 1; transform: translateY(0); }
+        }
+
+        /* Card Styling */
+        .card {
+            background: rgba(255, 255, 255, 0.05);
+            backdrop-filter: blur(10px);
+            border-radius: 15px;
+            padding: 20px;
+            margin-bottom: 20px;
+            box-shadow: 0 0 20px rgba(0, 0, 0, 0.3);
+            transition: transform 0.3s ease;
+        }
+
+        .card:hover {
+            transform: translateY(-5px);
+        }
+
+        /* Form Styling */
+        form {
+            display: flex;
+            flex-direction: column;
+            gap: 15px;
+        }
+
+        label {
+            color: #ddd;
+            font-size: 1rem;
+            display: flex;
+            flex-direction: column;
+            gap: 5px;
+        }
+
+        textarea, input[type="text"], select {
+            background: rgba(255, 255, 255, 0.1);
+            border: none;
+            border-radius: 8px;
+            padding: 10px;
+            color: #fff;
+            font-size: 1rem;
+            outline: none;
+            transition: all 0.3s ease;
+        }
+
+        textarea:focus, input[type="text"]:focus, select:focus {
+            box-shadow: 0 0 15px rgba(0, 255, 204, 0.5);
+        }
+
+        button {
+            background: linear-gradient(90deg, #00ffcc, #00ccff);
+            border: none;
+            border-radius: 8px;
+            padding: 10px;
+            color: #fff;
+            font-weight: bold;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+
+        button:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 0 15px rgba(0, 255, 204, 0.7);
+        }
+
+        /* Lists */
+        ul {
+            list-style: none;
+            padding-left: 0;
+        }
+
+        li {
+            background: rgba(255, 255, 255, 0.05);
+            padding: 10px;
+            border-radius: 8px;
+            margin-bottom: 10px;
+            transition: background 0.3s ease;
+        }
+
+        li:hover {
+            background: rgba(255, 255, 255, 0.15);
+        }
+
+        /* Links */
+        a {
+            color: #00ffcc;
+            text-decoration: none;
+            font-weight: bold;
+            transition: color 0.3s ease;
+        }
+
+        a:hover {
+            color: #00ccff;
+            text-shadow: 0 0 10px rgba(0, 204, 255, 0.7);
+        }
+
+        /* Responsive */
+        @media (max-width: 768px) {
+            .dashboard {
+                padding: 10px;
+            }
+            h2 { font-size: 2rem; }
+            h3 { font-size: 1.5rem; }
+        }
+    </style>
+</head>
+<body>
+    <div class="particles" id="particles"></div>
+    <div class="dashboard">
+        <h2>Welcome, {{ user.username }} (Winghead)</h2>
+
+        <!-- Update Learning -->
+        <div class="card">
+            <form method="POST">
+                <textarea name="learning_text" placeholder="What did you learn today?" rows="4" required></textarea>
+                <button type="submit">Update</button>
+            </form>
+        </div>
+
+        <!-- Wing Learnings -->
+        <div class="card">
+            <h2>Wing Learnings</h2>
+            <ul>
+                {% for learning in learnings %}
+                    <li><strong>{{ learning.username }}</strong>: {{ learning.learning_text }}</li>
+                {% endfor %}
+            </ul>
+        </div>
+
+        <!-- Create Quiz -->
+        <div class="card">
+            <h3>Create Quiz</h3>
+            <form method="POST">
+                <input type="hidden" name="action" value="create_quiz">
+                <label>Question: <input type="text" name="question" required></label>
+                <label>Quiz Type:
+                    <select name="quiz_type" onchange="showOptions(this.value)">
+                        <option value="2_option">2 Options</option>
+                        <option value="4_option">4 Options</option>
+                    </select>
+                </label>
+                <div id="options">
+                    <label>Option 1: <input type="text" name="option_1" required></label>
+                    <label>Option 2: <input type="text" name="option_2" required></label>
+                </div>
+                <label>Correct Option: <select name="correct_option">
+                    <option value="1">1</option>
+                    <option value="2">2</option>
+                </select></label>
+                <button type="submit">Create Quiz</button>
+            </form>
+        </div>
+
+        <!-- Your Quizzes -->
+        <div class="card">
+            <h3>Your Quizzes</h3>
+            <ul>
+                {% for quiz in quizzes %}
+                    <li><a href="{{ url_for('winghead_dashboard', quiz_id=quiz.id) }}">{{ quiz.question }}</a></li>
+                {% endfor %}
+            </ul>
+        </div>
+
+        <!-- Quiz Responses -->
+        {% if responses %}
+            <div class="card">
+                <h3>Responses for Selected Quiz</h3>
+                <ul>
+                    {% for response in responses %}
+                        <li>{{ response.username }}: {{ response.option_text or response.text_response }} ({{ 'Correct' if response.is_correct else 'Wrong' }})</li>
+                    {% endfor %}
+                </ul>
+            </div>
+        {% endif %}
+
+        <!-- Send Notification -->
+        <div class="card">
+            <h3>Send Notification</h3>
+            <form method="POST">
+                <input type="hidden" name="action" value="send_notification">
+                <label>Notification: <textarea name="notification_content" rows="3" required></textarea></label>
+                <button type="submit">Send</button>
+            </form>
+        </div>
+
+        <!-- Latest Notifications -->
+        <div class="card">
+            <h3>Latest Notifications</h3>
+            <ul>
+                {% for notification in notifications %}
+                    <li>{{ notification.content }} (Sent: {{ notification.sent_at }})</li>
+                {% endfor %}
+            </ul>
+        </div>
+
+        <a href="{{ url_for('logout') }}">Logout</a>
+    </div>
+
+    <script>
+        // Floating particles effect
+        const particlesContainer = document.getElementById('particles');
+        const particleCount = 40;
+
+        for (let i = 0; i < particleCount; i++) {
+            const particle = document.createElement('div');
+            particle.style.position = 'absolute';
+            particle.style.width = `${Math.random() * 4 + 2}px`;
+            particle.style.height = particle.style.width;
+            particle.style.background = `rgba(255, 255, 255, ${Math.random() * 0.5 + 0.2})`;
+            particle.style.borderRadius = '50%';
+            particle.style.left = `${Math.random() * 100}vw`;
+            particle.style.top = `${Math.random() * 100}vh`;
+            particle.style.animation = `float ${Math.random() * 8 + 4}s infinite ease-in-out`;
+            particlesContainer.appendChild(particle);
+        }
+
+        const styleSheet = document.createElement('style');
+        styleSheet.textContent = `
+            @keyframes float {
+                0% { transform: translateY(0); opacity: 0.7; }
+                50% { transform: translateY(-15vh); opacity: 0.3; }
+                100% { transform: translateY(0); opacity: 0.7; }
+            }
+        `;
+        document.head.appendChild(styleSheet);
+
+        // Card hover animation
+        const cards = document.querySelectorAll('.card');
+        cards.forEach(card => {
+            card.addEventListener('mouseenter', () => {
+                card.style.boxShadow = '0 0 30px rgba(0, 255, 204, 0.5)';
+            });
+            card.addEventListener('mouseleave', () => {
+                card.style.boxShadow = '0 0 20px rgba(0, 0, 0, 0.3)';
+            });
+        });
+
+        // Dynamic quiz options
+        function showOptions(type) {
+            const optionsDiv = document.getElementById('options');
+            optionsDiv.innerHTML = '';
+            const count = type === '2_option' ? 2 : 4;
+            for (let i = 1; i <= count; i++) {
+                optionsDiv.innerHTML += `<label>Option ${i}: <input type="text" name="option_${i}" required></label>`;
+            }
+            const correctSelect = document.querySelector('select[name="correct_option"]');
+            correctSelect.innerHTML = '';
+            for (let i = 1; i <= count; i++) {
+                correctSelect.innerHTML += `<option value="${i}">${i}</option>`;
+            }
+        }
+    </script>
+</body>
+</html>
