@@ -1,13 +1,5 @@
-
-
-# requirements.txt
-
-# Web framework and core dependencies
-Flask==3.0.3              # Core web framework for routing, templating, and sessions
-Werkzeug==3.0.4           # Security utilities (e.g., password hashing), bundled with Flask but explicit for clarity
-
-# Supabase client for database interactions
-supabase==2.7.4           # Python client for Supabase database operations
-
-# Additional utilities (recommended for production)
-python-dotenv==1.0.1      # Load environment variables from .env file (optional, if you use it for config)
+Flask==3.0.3
+Werkzeug==3.0.4
+supabase==2.7.4
+python-dotenv==1.0.1
+gunicorn==23.0.0
