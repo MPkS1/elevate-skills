@@ -501,4 +501,4 @@ def special_admin_view_learnings():
     return render_template('special_admin_view_learnings.html', wings=wings, learnings=learnings)
 
 if __name__ == '__main__':
-    app.run(debug=True)
+    app.run(host='0.0.0.0', port=10000)
