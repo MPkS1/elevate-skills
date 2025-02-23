@@ -3,177 +3,440 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Futuristic Login</title>
+    <title>Login</title>
     <style>
         * {
             margin: 0;
             padding: 0;
             box-sizing: border-box;
-            font-family: 'Poppins', sans-serif;
         }
 
         body {
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            min-height: 100vh;
-            background: linear-gradient(135deg, #0f0c29, #302b63, #24243e);
+            font-family: 'Courier New', monospace;
+            background: #0a0a14;
             overflow: hidden;
+            cursor: none;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            min-height: 100vh;
+            position: relative;
         }
 
-        /* Floating particles background */
-        .particles {
-            position: absolute;
+        body::before {
+            content: '';
+            position: fixed;
+            top: 0;
+            left: 0;
             width: 100%;
             height: 100%;
+            background: repeating-linear-gradient(to bottom, transparent 0%, rgba(0, 255, 255, 0.05) 2%, transparent 4%);
+            animation: scanline 3s linear infinite, glitchShift 0.3s infinite alternate;
             pointer-events: none;
-            z-index: 0;
+            z-index: 3;
+            mix-blend-mode: overlay;
         }
 
-        .container {
-            position: relative;
-            background: rgba(255, 255, 255, 0.1);
-            backdrop-filter: blur(10px);
-            border-radius: 20px;
+        @keyframes scanline {
+            0% { transform: translateY(-100%); }
+            100% { transform: translateY(100%); }
+        }
+
+        @keyframes glitchShift {
+            0%, 100% { transform: skewX(0deg); clip-path: inset(0 0 0 0); }
+            50% { transform: skewX(2deg); clip-path: inset(2% 0 2% 0); }
+        }
+
+        form {
+            width: 380px;
             padding: 40px;
-            box-shadow: 0 0 30px rgba(0, 0, 0, 0.5);
-            z-index: 1;
-            width: 100%;
-            max-width: 400px;
-            animation: fadeIn 1s ease-in-out;
+            background: rgba(0, 10, 20, 0.8);
+            backdrop-filter: blur(20px) saturate(200%);
+            border: 2px solid rgba(0, 255, 255, 0.5);
+            border-radius: 20px;
+            box-shadow: 0 0 100px rgba(0, 255, 255, 0.5), inset 0 0 30px rgba(0, 255, 255, 0.2);
+            z-index: 10;
+            transform-style: preserve-3d;
+            animation: floatRotate 10s infinite ease-in-out;
+            position: relative;
         }
 
-        @keyframes fadeIn {
-            0% { opacity: 0; transform: translateY(50px); }
-            100% { opacity: 1; transform: translateY(0); }
+        @keyframes floatRotate {
+            0%, 100% { transform: rotateX(0deg) rotateY(0deg); }
+            50% { transform: rotateX(10deg) rotateY(20deg); }
         }
 
         h2 {
-            color: #fff;
+            color: #0ff;
             text-align: center;
             margin-bottom: 30px;
-            font-size: 2rem;
             text-transform: uppercase;
-            letter-spacing: 2px;
-            text-shadow: 0 0 10px rgba(0, 255, 255, 0.8);
+            letter-spacing: 4px;
+            font-size: 24px;
+            animation: neonPulse 1.5s infinite;
+            text-shadow: 0 0 20px #0ff;
         }
 
-        .form-group {
-            margin-bottom: 20px;
+        @keyframes neonPulse {
+            0%, 100% { opacity: 1; text-shadow: 0 0 20px #0ff, 0 0 40px #00f; }
+            50% { opacity: 0.8; text-shadow: 0 0 10px #0ff; }
         }
 
         label {
-            color: #ddd;
-            font-size: 1rem;
+            color: #0ff;
+            font-size: 14px;
+            margin-bottom: 10px;
             display: block;
-            margin-bottom: 5px;
-            transition: color 0.3s ease;
+            animation: flickerLabel 3s infinite;
         }
 
-        input[type="text"],
-        input[type="password"] {
+        @keyframes flickerLabel {
+            0%, 19%, 21%, 23%, 100% { opacity: 1; }
+            20%, 22% { opacity: 0.5; }
+        }
+
+        input {
             width: 100%;
-            padding: 12px;
-            border: none;
-            border-radius: 10px;
-            background: rgba(255, 255, 255, 0.2);
-            color: #fff;
-            font-size: 1rem;
-            outline: none;
-            transition: all 0.3s ease;
+            padding: 14px;
+            background: rgba(0, 0, 0, 0.7);
+            border: 1px solid rgba(0, 255, 255, 0.6);
+            border-radius: 8px;
+            color: #0ff;
+            transition: all 0.4s ease;
+            position: relative;
+            z-index: 11;
+            margin-bottom: 30px;
         }
 
-        input[type="text"]:focus,
-        input[type="password"]:focus {
-            background: rgba(255, 255, 255, 0.3);
-            box-shadow: 0 0 15px rgba(0, 255, 255, 0.5);
+        input:hover {
+            transform: scale(1.05);
+            box-shadow: 0 0 40px rgba(0, 255, 255, 0.7);
+        }
+
+        input:focus {
+            outline: none;
+            border-color: #00f;
+            box-shadow: 0 0 50px rgba(0, 255, 255, 1);
+            animation: inputHolo 2s infinite;
+        }
+
+        @keyframes inputHolo {
+            0%, 100% { box-shadow: 0 0 50px rgba(0, 255, 255, 1); }
+            50% { box-shadow: 0 0 70px rgba(0, 255, 255, 0.8), inset 0 0 20px #0ff; }
         }
 
         button {
             width: 100%;
-            padding: 12px;
-            background: linear-gradient(90deg, #00ffcc, #00ccff);
+            padding: 16px;
+            background: linear-gradient(135deg, #0ff 0%, #00f 50%, #0ff 100%);
             border: none;
-            border-radius: 10px;
-            color: #fff;
-            font-size: 1.1rem;
+            border-radius: 8px;
+            color: #000;
             font-weight: bold;
-            cursor: pointer;
-            transition: transform 0.3s ease, box-shadow 0.3s ease;
+            position: relative;
+            overflow: hidden;
+            transition: all 0.4s ease;
+            z-index: 11;
+        }
+
+        button::before {
+            content: '';
+            position: absolute;
+            top: -50%;
+            left: -50%;
+            width: 200%;
+            height: 200%;
+            background: radial-gradient(circle, rgba(255, 255, 255, 0.5) 10%, transparent 50%);
+            animation: ripple 3s infinite;
+            pointer-events: none;
+        }
+
+        @keyframes ripple {
+            0% { transform: rotate(0deg) scale(0.5); opacity: 0; }
+            50% { transform: rotate(180deg) scale(1); opacity: 0.3; }
+            100% { transform: rotate(360deg) scale(1.5); opacity: 0; }
         }
 
         button:hover {
-            transform: translateY(-3px);
-            box-shadow: 0 0 20px rgba(0, 255, 255, 0.7);
+            transform: scale(1.1);
+            box-shadow: 0 0 60px rgba(0, 255, 255, 1);
         }
 
-        /* Responsive design */
-        @media (max-width: 480px) {
-            .container {
-                padding: 20px;
-                max-width: 90%;
-            }
-            h2 {
-                font-size: 1.5rem;
-            }
+        button:active {
+            transform: scale(0.9);
+        }
+
+        .cyber-cursor {
+            position: fixed;
+            width: 30px;
+            height: 30px;
+            pointer-events: none;
+            z-index: 100;
+            transition: all 0.2s ease;
+        }
+
+        .cursor-style-1 {
+            background: radial-gradient(circle, #0ff 20%, transparent 70%);
+            border: 2px solid #00f;
+            border-radius: 50%;
+            animation: pulseCursor 1s infinite;
+        }
+
+        @keyframes pulseCursor {
+            0%, 100% { transform: scale(1); }
+            50% { transform: scale(1.3); }
+        }
+
+        .cursor-style-2 {
+            background: none;
+            border: 2px dashed #0ff;
+            border-radius: 0;
+            transform: rotate(45deg);
+            animation: spinCursor 2s infinite linear;
+        }
+
+        @keyframes spinCursor {
+            0% { transform: rotate(45deg); }
+            100% { transform: rotate(405deg); }
+        }
+
+        .cursor-style-3 {
+            background: linear-gradient(45deg, #0ff, #00f);
+            border-radius: 50%;
+            animation: bounceCursor 1.5s infinite;
+            box-shadow: 0 0 20px #0ff;
+        }
+
+        @keyframes bounceCursor {
+            0%, 100% { transform: translateY(0); }
+            50% { transform: translateY(-10px); }
+        }
+
+        .cyber-cursor.hover {
+            transform: scale(1.5) !important;
+            box-shadow: 0 0 30px #0ff !important;
+        }
+
+        .cursor-trail {
+            position: absolute;
+            width: 12px;
+            height: 12px;
+            background: rgba(0, 255, 255, 0.5);
+            border-radius: 50%;
+            pointer-events: none;
+            z-index: 99;
+            animation: trailExplode 0.7s ease forwards;
+        }
+
+        @keyframes trailExplode {
+            0% { opacity: 1; transform: scale(1); }
+            100% { opacity: 0; transform: scale(2); }
+        }
+
+        .validation-msg {
+            position: absolute;
+            top: -40px;
+            left: 20px;
+            color: #0ff;
+            font-size: 12px;
+            background: rgba(0, 0, 0, 0.9);
+            padding: 8px 14px;
+            border-radius: 5px;
+            box-shadow: 0 0 15px rgba(0, 255, 255, 0.7);
+            animation: floatGlitch 3s ease forwards;
+            z-index: 12;
+        }
+
+        @keyframes floatGlitch {
+            0% { opacity: 1; transform: translateY(0); }
+            50% { transform: translateY(-15px) skewX(5deg); }
+            100% { opacity: 0; transform: translateY(-30px); }
+        }
+
+        .hud-element {
+            position: absolute;
+            color: #0ff;
+            font-size: 12px;
+            text-transform: uppercase;
+            animation: drift 12s infinite ease-in-out;
+            text-shadow: 0 0 10px #0ff;
+            pointer-events: none;
+            z-index: 5;
+        }
+
+        @keyframes drift {
+            0%, 100% { transform: translate(0, 0); opacity: 0.7; }
+            50% { transform: translate(20px, -30px); opacity: 1; }
+        }
+
+        #particles-js {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            z-index: 1;
+            background: radial-gradient(circle at center, #1a1a3d 0%, #0a0a14 80%);
+        }
+
+        /* Flash Messages */
+        .flash-messages {
+            position: absolute;
+            top: 10px;
+            width: 380px;
+            z-index: 15;
+            text-align: center;
+        }
+
+        .flash-danger {
+            color: #0ff;
+            background: rgba(0, 0, 0, 0.9);
+            padding: 10px;
+            border-radius: 5px;
+            box-shadow: 0 0 20px rgba(0, 255, 255, 0.7);
+            animation: flashGlitch 2s ease forwards;
+        }
+
+        @keyframes flashGlitch {
+            0% { opacity: 0; transform: translateY(-20px) skewX(5deg); }
+            20% { opacity: 1; transform: translateY(0) skewX(0deg); }
+            80% { opacity: 1; transform: translateY(0); }
+            100% { opacity: 0; transform: translateY(-20px); }
         }
     </style>
 </head>
 <body>
-    <div class="particles" id="particles"></div>
-    <div class="container">
-        <h2>Login</h2>
-        <form method="POST">
-            <div class="form-group">
-                <label>Username:</label>
-                <input type="text" name="username" required>
+    <div id="particles-js"></div>
+    <h2>Login</h2>
+    <!-- Flash Messages -->
+    {% with messages = get_flashed_messages(with_categories=true) %}
+        {% if messages %}
+            <div class="flash-messages">
+                {% for category, message in messages %}
+                    <div class="flash-{{ category }}">{{ message }}</div>
+                {% endfor %}
             </div>
-            <div class="form-group">
-                <label>Password:</label>
-                <input type="password" name="password" required>
-            </div>
-            <button type="submit">Login</button>
-        </form>
-    </div>
+        {% endif %}
+    {% endwith %}
+    <form method="POST" action="{{ url_for('login') }}">
+        <label>Username:</label>
+        <input type="text" name="username" required><br>
+        <label>Password:</label>
+        <input type="password" name="password" required><br>
+        <button type="submit">Login</button>
+    </form>
+    <div class="cyber-cursor"></div>
+    <div class="hud-element" style="top: 15%; left: 5%;">Initializing...</div>
+    <div class="hud-element" style="top: 85%; right: 5%;">Neural Link Active</div>
+    <div class="hud-element" style="top: 40%; left: 80%;">Sys Hack Detected</div>
 
+    <script src="https://cdn.jsdelivr.net/npm/particles.js@2.0.0/particles.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.11.4/gsap.min.js"></script>
     <script>
-        // JavaScript for floating particles effect
-        const particlesContainer = document.getElementById('particles');
-        const particleCount = 50;
+        // Cursor Animation Cycling
+        const cursor = document.querySelector('.cyber-cursor');
+        const cursorStyles = ['cursor-style-1', 'cursor-style-2', 'cursor-style-3'];
+        let currentStyle = 0;
 
-        for (let i = 0; i < particleCount; i++) {
-            const particle = document.createElement('div');
-            particle.classList.add('particle');
-            particle.style.position = 'absolute';
-            particle.style.width = `${Math.random() * 5 + 2}px`;
-            particle.style.height = particle.style.width;
-            particle.style.background = `rgba(${Math.random() * 255}, 255, 255, 0.5)`;
-            particle.style.borderRadius = '50%';
-            particle.style.left = `${Math.random() * 100}vw`;
-            particle.style.top = `${Math.random() * 100}vh`;
-            particle.style.animation = `float ${Math.random() * 10 + 5}s infinite ease-in-out`;
-            particlesContainer.appendChild(particle);
+        function cycleCursor() {
+            cursor.classList.remove(...cursorStyles);
+            cursor.classList.add(cursorStyles[currentStyle]);
+            currentStyle = (currentStyle + 1) % cursorStyles.length;
         }
 
-        // Add keyframes dynamically
-        const styleSheet = document.createElement('style');
-        styleSheet.textContent = `
-            @keyframes float {
-                0% { transform: translateY(0); opacity: 0.8; }
-                50% { transform: translateY(-20vh); opacity: 0.4; }
-                100% { transform: translateY(0); opacity: 0.8; }
-            }
-        `;
-        document.head.appendChild(styleSheet);
+        cycleCursor();
+        setInterval(cycleCursor, 10000);
 
-        // Input field animation on focus
-        const inputs = document.querySelectorAll('input');
-        inputs.forEach(input => {
-            input.addEventListener('focus', () => {
-                input.previousElementSibling.style.color = '#00ffcc';
+        document.addEventListener('mousemove', (e) => {
+            gsap.to(cursor, {
+                x: e.pageX - 15,
+                y: e.pageY - 15,
+                duration: 0.15,
+                ease: 'power3.out'
             });
-            input.addEventListener('blur', () => {
-                input.previousElementSibling.style.color = '#ddd';
+
+            const trail = document.createElement('div');
+            trail.className = 'cursor-trail';
+            trail.style.left = e.pageX - 6 + 'px';
+            trail.style.top = e.pageY - 6 + 'px';
+            document.body.appendChild(trail);
+            setTimeout(() => trail.remove(), 700);
+        });
+
+        document.querySelectorAll('input, button').forEach(el => {
+            el.addEventListener('mouseenter', () => cursor.classList.add('hover'));
+            el.addEventListener('mouseleave', () => cursor.classList.remove('hover'));
+        });
+
+        // Validation with Glitch (client-side)
+        const passwordInput = document.querySelector('input[type="password"]');
+        passwordInput.addEventListener('input', (e) => {
+            if (e.target.value.length < 0) {
+                const msg = document.createElement('div');
+                msg.className = 'validation-msg';
+                msg.textContent = 'Error: 10+ chars for secure uplink';
+                e.target.parentElement.appendChild(msg);
+                setTimeout(() => msg.remove(), 3000);
+
+                gsap.to('form', { x: '+=5', yoyo: true, repeat: 5, duration: 0.05 });
+            }
+        });
+
+        // Button Animation
+        const submitBtn = document.querySelector('button');
+        submitBtn.addEventListener('click', (e) => {
+            gsap.timeline()
+                .to(submitBtn, { boxShadow: '0 0 80px #0ff', duration: 0.3 })
+                .to(submitBtn, { scale: 0.85, duration: 0.15 })
+                .to(submitBtn, { scale: 1.1, duration: 0.15 })
+                .to(submitBtn, { scale: 1, duration: 0.1 })
+                .to('form', { rotate: 2, yoyo: true, repeat: 6, duration: 0.05 }, '-=0.4')
+                .to('body::before', { opacity: 0.8, duration: 0.2, yoyo: true, repeat: 4 }, '-=0.3');
+        });
+
+        // Particles.js
+        particlesJS('particles-js', {
+            particles: {
+                number: { value: 120, density: { enable: true, value_area: 800 } },
+                color: { value: ['#0ff', '#00f', '#0f0'] },
+                shape: { type: 'polygon', polygon: { nb_sides: 5 } },
+                opacity: { value: 0.7, random: true },
+                size: { value: 5, random: true },
+                line_linked: { enable: true, distance: 100, color: '#0ff', opacity: 0.6, width: 2 },
+                move: { enable: true, speed: 4, direction: 'none', random: true }
+            },
+            interactivity: {
+                detect_on: 'canvas',
+                events: {
+                    onhover: { enable: true, mode: 'grab' },
+                    onclick: { enable: true, mode: 'push' },
+                    onkeyup: { enable: true, mode: 'bubble' }
+                },
+                modes: {
+                    grab: { distance: 150, line_linked: { opacity: 1 } },
+                    push: { particles_nb: 8 },
+                    bubble: { distance: 250, size: 8, duration: 0.4 }
+                }
+            },
+            retina_detect: true
+        });
+
+        // 3D Gyro Parallax
+        document.addEventListener('mousemove', (e) => {
+            const x = (window.innerWidth / 2 - e.pageX) * 0.03;
+            const y = (window.innerHeight / 2 - e.pageY) * 0.03;
+            gsap.to('form', {
+                x: x,
+                y: y,
+                rotationX: y * 0.1,
+                rotationY: -x * 0.1,
+                duration: 0.6,
+                ease: 'power3.out'
+            });
+            gsap.to('body::before', {
+                transform: `translateY(${y * 0.5}px) skewX(${x * 0.05}deg)`,
+                duration: 0.3
             });
         });
     </script>
