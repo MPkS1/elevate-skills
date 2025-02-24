@@ -54,16 +54,19 @@ def special_admin():
     if request.method == 'POST':
         action = request.form.get('action')
 
+        # Create Wing
         if action == 'create_wing':
             wing_name = request.form['wing_name']
             supabase.table('wings').insert({"name": wing_name}).execute()
             flash('Wing Created Successfully!', 'success')
 
+        # Delete Wing
         elif action == 'delete_wing':
             wing_id = request.form['wing_id']
             supabase.table('wings').delete().eq('id', wing_id).execute()
             flash('Wing Deleted!', 'danger')
 
+        # Create User
         elif action == 'create_user':
             username = request.form['username']
             password = request.form['password']
@@ -81,16 +84,19 @@ def special_admin():
                 }).execute()
                 flash('User Created!', 'success')
 
+        # Delete User
         elif action == 'delete_user':
             user_id = request.form['user_id']
             supabase.table('users').delete().eq('id', user_id).execute()
             flash('User Deleted!', 'danger')
 
+        # Delete Learning
         elif action == 'delete_learning':
             learning_id = request.form['learning_id']
             supabase.table('learnings').delete().eq('id', learning_id).execute()
             flash('Learning response deleted!', 'danger')
 
+        # Create Quiz
         elif action == 'create_quiz':
             question = request.form['question']
             quiz_type = request.form['quiz_type']
@@ -115,11 +121,13 @@ def special_admin():
                     }).execute()
             flash("Quiz created!", "success")
 
+        # Delete Quiz
         elif action == 'delete_quiz':
             quiz_id = request.form['quiz_id']
             supabase.table('quizzes').delete().eq('id', quiz_id).execute()
             flash("Quiz deleted!", "danger")
 
+        # Send Notification
         elif action == 'send_notification':
             content = request.form['notification_content']
             wing_id = request.form['wing_id'] or None
@@ -130,6 +138,7 @@ def special_admin():
             }).execute()
             flash("Notification sent!", "success")
 
+        # Send News
         elif action == 'send_news':
             content = request.form['news_content']
             supabase.table('news').insert({
@@ -138,29 +147,58 @@ def special_admin():
             }).execute()
             flash("News sent!", "success")
 
+        # Delete Notification
         elif action == 'delete_notification':
             notification_id = request.form['notification_id']
             supabase.table('notifications').delete().eq('id', notification_id).execute()
             flash("Notification deleted!", "danger")
 
+        # Delete News
         elif action == 'delete_news':
             news_id = request.form['news_id']
             supabase.table('news').delete().eq('id', news_id).execute()
             flash("News deleted!", "danger")
 
+        # Change User Role
+        elif action == 'change_role':
+            user_id = request.form['user_id']
+            new_role = request.form['new_role']
+            supabase.table('users').update({"role": new_role}).eq('id', user_id).execute()
+            flash(f"User role changed to {new_role}!", "success")
+
+    # Fetch data
     wings = supabase.table('wings').select('*').execute().data or []
     users = supabase.table('users').select('*').execute().data or []
 
+    # Calculate counts
     members_count = len([u for u in users if u['role'] == 'member'])
     wingheads_count = len([u for u in users if u['role'] == 'winghead'])
     admins_count = len([u for u in users if u['role'] == 'admin'])
     special_admins_count = len([u for u in users if u['role'] == 'special_admin'])
 
-    selected_wing_id = request.form.get('wing_id') if request.method == 'POST' else None
+    # Handle wing selection for learnings
+    selected_wing_id = request.args.get('wing_id') or (request.form.get('wing_id') if request.method == 'POST' else None)
     learnings = []
+    wing_members = []
     if selected_wing_id:
         learnings = supabase.table('learnings').select('id, username, role, learning_text').eq('wing_id', selected_wing_id).execute().data or []
+        wing_members = supabase.table('users').select('id, username, role').eq('wing_id', selected_wing_id).execute().data or []
 
+    # Handle member progress
+    selected_user_id = request.args.get('user_id')
+    member_progress = {}
+    if selected_user_id:
+        member_progress['learnings'] = supabase.table('learnings').select('learning_text, created_at').eq('username', 
+            supabase.table('users').select('username').eq('id', selected_user_id).execute().data[0]['username']).execute().data or []
+        member_progress['quiz_responses'] = supabase.table('quiz_responses').select('quiz_id, selected_option_id, text_response, submitted_at').eq('user_id', selected_user_id).execute().data or []
+        for response in member_progress['quiz_responses']:
+            response['question'] = supabase.table('quizzes').select('question').eq('id', response['quiz_id']).execute().data[0]['question']
+            if response['selected_option_id']:
+                option = supabase.table('quiz_options').select('option_text, is_correct').eq('id', response['selected_option_id']).execute().data[0]
+                response['option_text'] = option['option_text']
+                response['is_correct'] = option['is_correct']
+
+    # Fetch quizzes and responses
     quizzes = supabase.table('quizzes').select('id, question, quiz_type, wing_id').execute().data or []
     selected_quiz_id = request.args.get('quiz_id')
     responses = []
@@ -184,7 +222,9 @@ def special_admin():
                           admins_count=admins_count, special_admins_count=special_admins_count,
                           learnings=learnings, selected_wing_id=selected_wing_id,
                           quizzes=quizzes, responses=responses, selected_quiz_id=selected_quiz_id,
-                          notifications=notifications, news=news)
+                          notifications=notifications, news=news, wing_members=wing_members,
+                          selected_user_id=selected_user_id, member_progress=member_progress)
+
 
 @app.route('/admin', methods=['GET', 'POST'])
 def admin():
