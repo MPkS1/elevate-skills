@@ -19,10 +19,9 @@
             padding: 20px;
             overflow-x: hidden;
             position: relative;
-            perspective: 1000px; /* Enables 3D space */
+            perspective: 1000px;
         }
 
-        /* Floating particles */
         .particles {
             position: absolute;
             width: 100%;
@@ -59,7 +58,6 @@
             100% { text-shadow: 0 0 20px rgba(0, 255, 204, 1), 0 0 30px rgba(0, 204, 255, 0.8); }
         }
 
-        /* Flash Messages */
         .success { color: #00ffcc; }
         .error { color: #ff3366; }
         p.success, p.error {
@@ -76,7 +74,6 @@
             100% { opacity: 1; transform: translateY(0); }
         }
 
-        /* Card Styling with 3D Effect */
         .card {
             background: rgba(255, 255, 255, 0.05);
             backdrop-filter: blur(12px);
@@ -94,7 +91,31 @@
             box-shadow: 0 0 40px rgba(0, 255, 204, 0.6), 0 0 60px rgba(0, 204, 255, 0.4);
         }
 
-        /* Form Styling */
+        .wings-boxes {
+            padding: 10px;
+        }
+
+        .wings-container {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 15px;
+        }
+
+        .wing-box {
+            background: rgba(255, 255, 255, 0.1);
+            backdrop-filter: blur(10px);
+            border-radius: 10px;
+            padding: 15px;
+            width: 200px;
+            text-align: center;
+            transition: transform 0.3s ease, box-shadow 0.3s ease;
+        }
+
+        .wing-box:hover {
+            transform: translateZ(10px);
+            box-shadow: 0 0 20px rgba(255, 0, 204, 0.6);
+        }
+
         .form-group {
             margin-bottom: 20px;
         }
@@ -157,7 +178,16 @@
             100% { background-position: 0% 50%; }
         }
 
-        /* Lists */
+        button[type="submit"] {
+            background: linear-gradient(90deg, #ff3366, #cc00ff);
+            margin-left: 10px;
+        }
+
+        button[type="submit"]:hover {
+            transform: translateZ(5px);
+            box-shadow: 0 0 20px rgba(255, 51, 102, 0.8);
+        }
+
         ul {
             list-style: none;
             padding-left: 0;
@@ -176,7 +206,6 @@
             transform: translateZ(5px);
         }
 
-        /* Links */
         a {
             color: #00ffcc;
             text-decoration: none;
@@ -189,18 +218,16 @@
             text-shadow: 0 0 10px rgba(255, 0, 204, 0.8);
         }
 
-        /* Delete Buttons */
-        button[type="submit"] {
-            background: linear-gradient(90deg, #ff3366, #cc00ff);
-            margin-left: 10px;
+        .member-item {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            padding: 10px;
+            background: rgba(255, 255, 255, 0.05);
+            border-radius: 8px;
+            margin-bottom: 10px;
         }
 
-        button[type="submit"]:hover {
-            transform: translateZ(5px);
-            box-shadow: 0 0 20px rgba(255, 51, 102, 0.8);
-        }
-
-        /* Responsive */
         @media (max-width: 768px) {
             .dashboard {
                 padding: 10px;
@@ -208,6 +235,7 @@
             h1 { font-size: 2rem; }
             h2 { font-size: 1.5rem; }
             h3 { font-size: 1.2rem; }
+            .wing-box { width: 150px; }
         }
     </style>
 </head>
@@ -234,40 +262,68 @@
             <p>Special Admins: {{ special_admins_count }}</p>
         </div>
 
-        <!-- Wing Selection -->
-        <div class="card form-group">
-            <h2>Select Wing to View Learnings</h2>
-            <form method="POST">
-                <input type="hidden" name="action" value="view_learnings">
-                <select name="wing_id" onchange="this.form.submit()">
-                    <option value="">-- Select a Wing --</option>
+        <!-- Wings Boxes -->
+        <div class="card wings-boxes">
+            <h2>Available Wings</h2>
+            <div class="wings-container">
+                {% if wings %}
                     {% for wing in wings %}
-                        <option value="{{ wing.id }}" {% if wing.id == selected_wing_id %}selected{% endif %}>
-                            {{ wing.name }}
-                        </option>
+                        <div class="wing-box">
+                            <a href="{{ url_for('special_admin', wing_id=wing.id) }}">{{ wing.name }}</a>
+                        </div>
                     {% endfor %}
-                </select>
-            </form>
+                {% else %}
+                    <p>No wings available.</p>
+                {% endif %}
+            </div>
         </div>
 
-        <!-- Learnings Display -->
-        {% if learnings %}
-            <div class="card learnings">
-                <h2>Learnings for Selected Wing</h2>
-                {% for learning in learnings %}
-                    <div class="learning-item">
-                        <p><strong>{{ learning.username }}</strong> ({{ learning.role }}): {{ learning.learning_text }}</p>
+        <!-- Wing Members -->
+        {% if selected_wing_id and wing_members %}
+            <div class="card members-box">
+                <h2>Members in Wing {{ (wings | selectattr('id', 'equalto', selected_wing_id | int) | first).name }}</h2>
+                {% for member in wing_members %}
+                    <div class="member-item">
+                        <a href="{{ url_for('special_admin', wing_id=selected_wing_id, user_id=member.id) }}">{{ member.username }}</a> ({{ member.role }})
                         <form method="POST" style="display:inline;">
-                            <input type="hidden" name="action" value="delete_learning">
-                            <input type="hidden" name="learning_id" value="{{ learning.id }}">
-                            <button type="submit" onclick="return confirm('Are you sure you want to delete this?')">Delete</button>
+                            <input type="hidden" name="action" value="delete_user">
+                            <input type="hidden" name="user_id" value="{{ member.id }}">
+                            <button type="submit" onclick="return confirm('Are you sure?')">Delete</button>
+                        </form>
+                        <form method="POST" style="display:inline;">
+                            <input type="hidden" name="action" value="change_role">
+                            <input type="hidden" name="user_id" value="{{ member.id }}">
+                            <select name="new_role" onchange="this.form.submit()">
+                                <option value="member" {% if member.role == 'member' %}selected{% endif %}>Member</option>
+                                <option value="winghead" {% if member.role == 'winghead' %}selected{% endif %}>Winghead</option>
+                                <option value="admin" {% if member.role == 'admin' %}selected{% endif %}>Admin</option>
+                            </select>
                         </form>
                     </div>
                 {% endfor %}
             </div>
         {% endif %}
 
-        <!-- Create Wing Form -->
+        <!-- Member Progress -->
+        {% if selected_user_id and member_progress %}
+            <div class="card progress-box">
+                <h2>Progress for {{ users|selectattr('id', 'equalto', selected_user_id|int)|first.username }}</h2>
+                <h3>Learning Responses ({{ member_progress.learnings|length }})</h3>
+                <ul>
+                    {% for learning in member_progress.learnings %}
+                        <li>{{ learning.learning_text }} (Sent: {{ learning.created_at }})</li>
+                    {% endfor %}
+                </ul>
+                <h3>Quiz Responses ({{ member_progress.quiz_responses|length }})</h3>
+                <ul>
+                    {% for response in member_progress.quiz_responses %}
+                        <li>{{ response.question }}: {{ response.option_text or response.text_response }} (Sent: {{ response.submitted_at }}) {% if response.is_correct is not none %}(Correct: {{ response.is_correct }}){% endif %}</li>
+                    {% endfor %}
+                </ul>
+            </div>
+        {% endif %}
+
+        <!-- Create Wing -->
         <div class="card form-group">
             <h2>Create Wing</h2>
             <form method="POST">
@@ -277,7 +333,7 @@
             </form>
         </div>
 
-        <!-- Create User Form -->
+        <!-- Create User -->
         <div class="card form-group">
             <h2>Create User</h2>
             <form method="POST">
@@ -304,9 +360,37 @@
             </form>
         </div>
 
+        <!-- Send Notification -->
+        <div class="card form-group">
+            <h2>Send Notification</h2>
+            <form method="POST">
+                <input type="hidden" name="action" value="send_notification">
+                <label>Notification: <textarea name="notification_content" rows="3" required></textarea></label>
+                <label>Wing:
+                    <select name="wing_id">
+                        <option value="">All Wings</option>
+                        {% for wing in wings %}
+                            <option value="{{ wing.id }}">{{ wing.name }}</option>
+                        {% endfor %}
+                    </select>
+                </label>
+                <button type="submit">Send</button>
+            </form>
+        </div>
+
+        <!-- Send News -->
+        <div class="card form-group">
+            <h2>Send News</h2>
+            <form method="POST">
+                <input type="hidden" name="action" value="send_news">
+                <label>News: <textarea name="news_content" rows="3" required></textarea></label>
+                <button type="submit">Send</button>
+            </form>
+        </div>
+
         <!-- Create Quiz -->
-        <div class="card">
-            <h3>Create Quiz</h3>
+        <div class="card form-group">
+            <h2>Create Quiz</h2>
             <form method="POST">
                 <input type="hidden" name="action" value="create_quiz">
                 <label>Question: <input type="text" name="question" required></label>
@@ -338,8 +422,8 @@
         </div>
 
         <!-- All Quizzes -->
-        <div class="card">
-            <h3>All Quizzes</h3>
+        <div class="card quizzes">
+            <h2>All Quizzes</h2>
             <ul>
                 {% for quiz in quizzes %}
                     <li>
@@ -356,8 +440,8 @@
 
         <!-- Quiz Responses -->
         {% if responses %}
-            <div class="card">
-                <h3>Responses for Selected Quiz</h3>
+            <div class="card quizzes">
+                <h2>Responses for Selected Quiz</h2>
                 <ul>
                     {% for response in responses %}
                         <li>{{ response.username }} ({{ response.wing_name or 'No Wing' }}): {{ response.option_text or response.text_response }} ({{ 'Correct' if response.is_correct else 'Wrong' }})</li>
@@ -366,37 +450,9 @@
             </div>
         {% endif %}
 
-        <!-- Send Notification -->
-        <div class="card">
-            <h3>Send Notification</h3>
-            <form method="POST">
-                <input type="hidden" name="action" value="send_notification">
-                <label>Notification: <textarea name="notification_content" rows="3" required></textarea></label>
-                <label>Wing:
-                    <select name="wing_id">
-                        <option value="">All Wings</option>
-                        {% for wing in wings %}
-                            <option value="{{ wing.id }}">{{ wing.name }}</option>
-                        {% endfor %}
-                    </select>
-                </label>
-                <button type="submit">Send</button>
-            </form>
-        </div>
-
-        <!-- Send News -->
-        <div class="card">
-            <h3>Send News</h3>
-            <form method="POST">
-                <input type="hidden" name="action" value="send_news">
-                <label>News: <textarea name="news_content" rows="3" required></textarea></label>
-                <button type="submit">Send</button>
-            </form>
-        </div>
-
         <!-- Latest Notifications -->
-        <div class="card">
-            <h3>Latest Notifications</h3>
+        <div class="card notifications">
+            <h2>Latest Notifications</h2>
             <ul>
                 {% for notification in notifications %}
                     <li>
@@ -412,8 +468,8 @@
         </div>
 
         <!-- Latest News -->
-        <div class="card">
-            <h3>Latest News</h3>
+        <div class="card news">
+            <h2>Latest News</h2>
             <ul>
                 {% for n in news %}
                     <li>
@@ -427,8 +483,6 @@
                 {% endfor %}
             </ul>
         </div>
-
-        <a href="{{ url_for('logout') }}">Logout</a>
     </div>
 
     <script>
